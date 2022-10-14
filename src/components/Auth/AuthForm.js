@@ -7,7 +7,7 @@ const AuthForm = () => {
   const passwordInputRef = useRef();
 
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -20,8 +20,32 @@ const AuthForm = () => {
     const enteredPassword = passwordInputRef.current.value;
 
     // we can add validations for password length and email etc. but will skip for now.
-    setIsLoading(true)
+    setIsLoading(true);
     if (isLogin) {
+      fetch(
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB04trebb3BO2K6NhkQfFl_9V5sEVMenYM",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email: enteredEmail,
+            password: enteredPassword,
+            returnSecureToken: true,
+          }),
+          headers: { "Content-Type": "application/json" },
+        }
+      ).then(resp =>{
+        setIsLoading(false);
+        if(resp.ok){
+          return resp.json().then(data =>{
+            console.log(data);
+          })
+        }else{
+          return resp.json().then(data=>{
+            let errorMessage = "Authentication failed!"
+            alert(errorMessage)
+          })
+        }
+      })
     } else {
       fetch(
         "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyB04trebb3BO2K6NhkQfFl_9V5sEVMenYM",
@@ -37,18 +61,18 @@ const AuthForm = () => {
           },
         }
       ).then((res) => {
-        setIsLoading(false)
-        if(res.ok){
+        setIsLoading(false);
+        if (res.ok) {
           //---
-        }else{
-          return res.json().then(data =>{
-            let errorMessage = 'Authentication failed!'
+        } else {
+          return res.json().then((data) => {
+            let errorMessage = "Authentication failed!";
 
-            if(data && data.error && data.error.message){
-              errorMessage = data.error.message
+            if (data && data.error && data.error.message) {
+              errorMessage = data.error.message;
             }
-            alert(errorMessage)
-          })
+            alert(errorMessage);
+          });
         }
       });
     }
@@ -72,7 +96,9 @@ const AuthForm = () => {
           />
         </div>
         <div className={classes.actions}>
-          {!isLoading && <button>{isLogin ? "Login" : "Create Account"}</button>}
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Create Account"}</button>
+          )}
           {isLoading && <p>Sending request...</p>}
           <button
             type="button"
